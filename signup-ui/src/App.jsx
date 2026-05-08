@@ -5,6 +5,10 @@ import "./App.css";
 import { useDispatch } from "react-redux";
 import { addUser } from "./redux/userSlice";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  `${window.location.protocol}//${window.location.hostname}:8000`;
+
 function App() {
   const dispatch = useDispatch();
 
@@ -16,11 +20,14 @@ function App() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/signup/", {
-        username,
-        email,
-        password,
-      });
+      await axios.post(
+        `${API_BASE_URL}/api/signup/`,
+        {
+          username,
+          email,
+          password,
+        },
+      );
 
       // store in redux
       dispatch(addUser({ username, email }));
@@ -32,7 +39,13 @@ function App() {
       setPassword("");
     } catch (error) {
       console.error(error);
-      alert("Signup Failed");
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        JSON.stringify(error?.response?.data || {}) ||
+        error.message ||
+        "Signup Failed";
+      alert(`Signup Failed: ${message}`);
     }
   };
 
